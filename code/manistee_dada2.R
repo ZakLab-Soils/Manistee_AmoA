@@ -45,6 +45,12 @@ R2.flags <- paste("-G", REV, "-A", FWD.RC)
 
 #See how much the primers appear in the data
 
+#primerHits function included in the "functions.R" file
+#primerHits <- function(primer, fn) {
+#nhits <- vcountPattern(primer, sread(readFastq(fn)), fixed = FALSE)
+#return(sum(nhits > 0))
+#}
+
 rbind(FWD.FowardReads = sapply(FWD.orients, primerHits, fn=fnFs.filtN[[1]]), FWD.ReverseReads = sapply(FWD.orients, primerHits, fn=fnRs.filtN[[1]]), REV.ForwardReads = sapply(REV.orients, primerHits, fn=fnFs.filtN[[1]]), REV.ReverseReads = sapply(REV.orients, primerHits, fn=fnRs.filtN[[1]]))
 
 #                Forward Complement Reverse RevComp
