@@ -151,3 +151,6 @@ head(track)
 uniquesToFasta(getUniques(seqtab.nochim), "data/seqtab_nochim_uniques.fasta")
 #write.table(t(seqtab.nochim), "seqtab_nochim_asv_table.txt", sep="\t", row.names=TRUE, col.names=NA, quote=FALSE)
 
+#command line for usearch to double check/remove non-amoA sequences for AOA (none for AOB yet)
+#usearch11.exe -usearch_global data\seqtab_nochim_uniques.fasta -db databases\AamoA.db_all.seqs.fasta -id 0.55 -strand plus -uc data\uclust_report.txt -matched data\uniques_nochim_match.fasta -notmatched uniques_nochim_nomatch.fasta
+
