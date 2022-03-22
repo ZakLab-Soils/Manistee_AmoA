@@ -94,6 +94,7 @@ head(sample.names)
 #Filter out samples based on number of N's, expected error (EE) and quality score (truncQ), length, 
 filtFs <- file.path(path.cut, "filtered", basename(cutFs))
 filtRs <- file.path(path.cut, "filtered", basename(cutRs))
+#Upcoming edit - change minLen to show minLen= c(200,200).
 filter.summary <- filterAndTrim(cutFs, filtFs, cutRs, filtRs, maxN = 0, maxEE = c(2,2), truncQ = 2, minLen = 100, rm.phix = TRUE, compress = TRUE, multithread = FALSE)
 
 #Error rate processing
@@ -126,17 +127,21 @@ dim(seqtab)
 seqtab.table <- table(nchar(getSequences(seqtab)))
 saveRDS(seqtab.table, file = "data/seqtab.table.rds")
 
+#After mergers added a string of Ns so I wanted to remove them in the colnames of the seqtab
+#newcolnames <- gsub("NNNNNNNNNN", "----------", colnames(seqtab))
+#colnames(seqtab) <- newcolnames
+
 seqtab.nochim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = FALSE, verbose = TRUE)
 dim(seqtab.nochim)
 sum(seqtab.nochim)/sum(seqtab)
 
 #Track DADA2 pipeline
-getN <- function(x) sum(getUniques(x))
+#getN <- function(x) sum(getUniques(x))
 
 # If processing a single sample, remove the sapply calls: e.g. replace sapply(dadaFs, getN) with getN(dadaFs)
-track <- as.data.frame(cbind(filter.summary, sapply(dadaFs, getN), rowSums(seqtab.nochim)))
-colnames(track) <- c("input", "filtered", "denoisedF", "nonchim")
-rownames(track) <- sample.names
+#track <- as.data.frame(cbind(filter.summary, sapply(dadaFs, getN), rowSums(seqtab.nochim)))
+#colnames(track) <- c("input", "filtered", "denoisedF", "nonchim")
+#rownames(track) <- sample.names
 
 getN <- function(x) sum(getUniques(x))
 track <- cbind(filter.summary, sapply(dadaFs, getN), sapply(dadaRs, getN), sapply(mergers, 
