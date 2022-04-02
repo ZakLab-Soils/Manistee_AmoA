@@ -327,6 +327,10 @@ psRs <- merge_phyloseq(psRs, psRs.refseqs)taxa_names(psRs) <- paste0("ASV_", seq
                               
 #Remove plots 49, 65 and 71 (low number of reads)
 psRs.rm496571 <- prune_samples(sample_names(psRs) != c("AOA49", "AOA65", "AOA71"), psRs)
+#Remove any ASVs that have less than 2 occurences 
+psRs.rm496571.less2 <- prune_taxa(taxa_sums(psRs.rm496571) > 2, psRs.rm496571)
+
+#Transform otu abundances for analysis
 #Relative abundance counts
 psRs.rm496571.relabund <- phyloseq::otu_table(psRs.rm496571)/rowSums(phyloseq::otu_table(psRs.rm496571))
 #Hellinger transformed (sqrt of relative abundance)
