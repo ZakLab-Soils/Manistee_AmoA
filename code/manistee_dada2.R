@@ -332,6 +332,6 @@ psRs.rm496571.less2 <- prune_taxa(taxa_sums(psRs.rm496571) > 2, psRs.rm496571)
 
 #Transform otu abundances for analysis with deconstand
 #Relative Abundance
-psRs.rm496571.less2.tot <- decostand(phylose::otu_table(psRs.rm496571.less2), method = "total")
+psRs.rm496571.less2.tot <- decostand(phyloseq::otu_table(psRs.rm496571.less2), method = "total")
 psRs.rm496571.less2.hel <- deconstand(phyloseq::otu_table(psRs.rm496571.less2), method = "hellinger")
                               
