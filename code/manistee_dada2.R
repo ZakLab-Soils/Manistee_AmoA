@@ -236,7 +236,8 @@ taxRs <- cbind(taxRs, str_split_fixed(taxRs$V2, ";", 11))
 taxRs$V2 <- NULL
 #Put NA for empty cells
 taxRs2 <- as.data.frame(apply(taxRs, 2, function(x) gsub("^$|^$", NA, x)))
-
+taxRs2$Taxon <- NULL
+                              
 #Remove any columns that have only NAs
 col_to_remove <- c()
 
@@ -254,8 +255,8 @@ if (length(col_to_remove) != 0) {
 }
                               
 #Rename columns
-names(taxRs3_attempt2)[1] <- "ASV"
-names(taxRs3_attempt2)[-1] <- paste0("1", 1:(ncol(taxRs3_attempt2)-1), "_tax")
+names(taxRs3)[1] <- "ASV"
+names(taxRs3)[-1] <- paste0("1", 1:(ncol(taxRs3)-1), "_tax")
 
 #Character for taxonomy
 for (col in 2:ncol(taxRs3)) {
@@ -279,8 +280,9 @@ for (col in 1:ncol(taxRs3)) {
  taxRs3 <- taxRs3[-1,]
                               
 #get it ready for phyloseq package
-asvRs_taxmerger <-asvRs2
-asvRs_taxmerger$ASV <- sub(" size=[0-9]* ", "", asvRs_taxmerger$header)
+asvRs_taxmerger <-asvRs3
+#asvRs_taxmerger$ASV <- sub(" size=[0-9]* ", "", asvRs_taxmerger$header)
+asv_taxmerger$ASV <- asv_taxmerger$header
 asvRs_taxmerger$header <- NULL
 asvRs.tax <- merge(asvRs_taxmerger, taxRs3, by.x = "ASV", by.y = "ASV")
 
@@ -293,7 +295,7 @@ asvRs.otu.tbl <- asvRs.otu.tbl[,1:42]
 asvRs.otu.tbl.t <- t(asvRs.otu.tbl)
 
 #tax_table
-taxRs.tax.tbl <- asvRs.tax_norel
+taxRs.tax.tbl <- asvRs.tax
 row.names(taxRs.tax.tbl) <- taxRs.tax.tbl$sequence
 taxRs.tax.tbl <- taxRs.tax.tbl[,45:length(taxRs.tax.tbl)]
 #taxRs.tax.tbl.t <- t(taxRs.tax.tbl)
@@ -317,19 +319,20 @@ samdf$STAND <- mapply(sample_stand_update, samdf$STAND, samdf$TYPE, SIMPLIFY = T
 #phyloseq object                              
 psRs.otu.t <- otu_table(asvRs.otu.tbl.t, taxa_are_rows = FALSE)
 psRs.tax <- tax_table(as.matrix(taxRs.tax.tbl))
-psRs.samdf <- sample_data(samdf2)
+psRs.samdf <- sample_data(samdf)
 psRs <- phyloseq(psRs.otu.t, psRs.tax, psRs.samdf)
 psRs.refseqs <- Biostrings::DNAStringSet(taxa_names(psRs))
 names(psRs.refseqs) <- taxa_names(psRs)
-psRs.refseqs <- Biostrings::DNAStringSet(taxa_names(psRs))
 #Rename the sequence name to "ASV_" # in the matrix
-psRs <- merge_phyloseq(psRs, psRs.refseqs)taxa_names(psRs) <- paste0("ASV_", seq(ntaxa(psRs)))
+psRs <- merge_phyloseq(psRs, psRs.refseqs)
+taxa_names(psRs) <- paste0("ASV_", seq(ntaxa(psRs)))
                               
 #Remove plots 49, 65 and 71 (low number of reads)
 psRs.rm496571 <- prune_samples(sample_names(psRs) != c("AOA49", "AOA65", "AOA71"), psRs)
 #Remove any ASVs that have less than 2 occurences 
 psRs.rm496571.less2 <- prune_taxa(taxa_sums(psRs.rm496571) > 2, psRs.rm496571)
 
+library(vegan)
 #Transform otu abundances for analysis with deconstand
 #Relative Abundance
 psRs.rm496571.less2.tot <- decostand(phyloseq::otu_table(psRs.rm496571.less2), method = "total")
