@@ -1,3 +1,19 @@
+#These commands to ASV.all.tbl also in titan code
+#ps.ASV.tbl <- as.data.frame(otu_table(phy.Rs)) %>% as_tibble(., rownames = "SAMPLE.ID")
+#ps.sample.tbl <- as.data.frame(sample_data(phy.Rs)) %>% as_tibble(.)
+
+#ASV.all.tbl <- ps.ASV.tbl %>%
+#pivot_longer(-SAMPLE.ID, names_to = "ASV", values_to = "COUNT") %>%
+#inner_join(ps.sample.tbl, ., by = "SAMPLE.ID") %>%
+#filter(TYPE == "environmental") %>%
+#group_by(PLOT, STAND, ASV) %>%
+#summarise(COUNT = sum(COUNT)) %>%
+#ungroup() %>%
+#group_by(ASV) %>%
+#mutate(ASV.TOTAL = sum(COUNT)) %>%
+#ungroup() %>%
+#filter(ASV.TOTAL > 0) %>%
+#select(-ASV.TOTAL
 
 TAX2.all.tbl <- ASV.all.tbl %>% inner_join(ps.tax.tbl, ., by = "ASV") %>% group_by(TAX2, STAND, PLOT) %>% summarize(COUNT = sum(COUNT))%>% ungroup()%>% select(TAX2, STAND, PLOT, COUNT)
 
