@@ -254,8 +254,9 @@ phy.aoa <- phyloseq(otu_table(asv.tbl, taxa_are_rows=FALSE), tax_table(as.matrix
 #Rename the sequence name to "ASV_" # in the matrix
 taxa_names(phy.aoa) <- paste0("ASV_", seq(ntaxa(phy.aoa)))
                               
-#Remove plots 49, 65 and 71 (low number of reads) and ASVs with < 2 occurences
+#Remove plots 49, 65 and 71 (low number of reads), plot 20 (only plot for that stand) and ASVs with < 2 occurences
 phy.aoa.pruned <- prune_samples(sample_names(phy.aoa) != c("AOA49", "AOA65", "AOA71"), phy.aoa)
+phy.aoa.pruned <- prune_samples(sample_names(phy.aoa) != "AOA20", phy.aoa.pruned)
 phy.aoa.pruned <- prune_taxa(taxa_sums(phy.aoa.pruned) > 2, phy.aoa.pruned)
 
 #Transforma data with decostand
