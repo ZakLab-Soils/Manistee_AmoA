@@ -9,20 +9,21 @@ phy.aoa.rare <- rarefy_even_depth(phy.aoa.pruned, rngseed =49657120, sample.size
 sample_data(phy.aoa.rare)$STAND.CLEAN <- as.factor(gsub("Stand_*", "", fixed=FALSE, sample_data(phy.aoa.rare)$STAND))
 
 plot.shannon.data <- plot_richness(phy.aoa.rare, x="STAND.CLEAN", measures = "Shannon", color = "STAND.CLEAN")$data
-plot.shannon.data$STAND.CLEAN <- factor(plot.chao.data$STAND.CLEAN, levels = c("58", "6", "7", "41", "24", "100", "22"))
+plot.shannon.data$STAND.CLEAN <- factor(plot.shannon.data$STAND.CLEAN, levels = c("41", "7", "58", "100", "6", "24", "22"))
 
 plot.chao.data <- plot_richness(phy.aoa.rare, x="STAND.CLEAN", measures = "Chao1", color = "STAND.CLEAN")$data
-plot.chao.data$STAND.CLEAN <- factor(plot.chao.data$STAND.CLEAN, levels = c("58", "6", "7", "41", "24", "100", "22"))
+plot.chao.data$STAND.CLEAN <- factor(plot.chao.data$STAND.CLEAN, levels = c("41", "7", "58", "100", "6", "24", "22"))
 
-boxplot.colors <- c("coral4", "coral3", "coral2", "coral", "dodgerblue", "dodgerblue3", "dodgerblue4" )
+boxplot.colors <- c("coral4", "coral3", "coral2", "dodgerblue", "dodgerblue2", "dodgerblue3", "dodgerblue4" )
 
 shannon.plot <- ggplot(data=plot.shannon.data, aes(x=STAND.CLEAN, y=value, fill = STAND.CLEAN)) + geom_boxplot(alpha=0.7) + xlab(paste0("STAND")) + ylab(paste0(" Diversity")) + guides(fill=guide_legend(title="Stand"))+scale_fill_manual(values = boxplot.colors)+theme(text=element_text(size = 18)) + ggtitle("Shannon Diversity of amoA in AOA")
 
-chao.plot <- ggplot(data=plot.chao.data, aes(x=STAND.CLEAN, y=value, fill = STAND.CLEAN)) + geom_boxplot(alpha=0.7) + xlab(paste0("STAND")) + ylab(paste0("Chao1 Estimation")) + guides(fill=guide_legend(title="Stand"))+scale_fill_manual(values = boxplot.colors)+theme(text=element_text(size = 18)) + ggtitle("Chao1 of amoA in AOA)
+chao.plot <- ggplot(data=plot.chao.data, aes(x=STAND.CLEAN, y=value, fill = STAND.CLEAN)) + geom_boxplot(alpha=0.7) + xlab(paste0("STAND")) + ylab(paste0("Chao1 Estimation")) + guides(fill=guide_legend(title="Stand"))+scale_fill_manual(values = boxplot.colors)+theme(text=element_text(size = 18)) + ggtitle("Chao1 of amoA in AOA")
 
 ##Rarefaction by Stand
 
 sample_data(phy.aoa.rare)$STAND.CLEAN <- as.factor(gsub("Stand_*", "", fixed=FALSE, sample_data(phy.aoa.rare)$STAND))
+sample_data(phy.aoa.rare)$STAND.CLEAN <- factor(sample_data(phy.aoa.rare)$STAND.CLEAN, c("41", "7", "58", "100", "6", "24", "22")) 
 phy.aoa.rare.merged <- merge_samples(phy.aoa.rare, "STAND.CLEAN")
 
 rarefaction.aoa <- rarecurve(as(otu_table(phy.aoa.rare.merged), "matrix"), step = 100, col=boxplot.colors)
@@ -37,5 +38,7 @@ protox <- mapply(FUN = function(x, y) {
 }, x = rarefaction.aoa, y = as.list(names(rarefaction.aoa)), SIMPLIFY = FALSE)
 xy <- do.call(rbind, protox)
 rownames(xy) <- NULL
+xy$SampleID <- factor(xy$SampleID, levels=c("41", "7", "58", "100", "6", "24","22"))
 
-Rarefaction.aoa.ggplot <- ggplot(xy, aes(x=subsample, y=value, group=SampleID)) + geom_line(aes(color=SampleID), size = 0.8) + scale_color_manual(values=boxplot.colors) + theme_bw() +ggtitle("Rarefaction Curves by Stand") + theme(plot.title =element_text(hjust = 0.5)) + xlab("Subsampled Reads") + ylab("Observed ASVs") + theme(plot.title = element_text(size = 20),legend.key.size = unit(.8,"cm"),legend.text = element_text(size = 16), legend.title=element_text(size = 18), axis.text = element_text(size = 10), axis.title = element_text(size = 16)) + guides(color=guide_legend(title = "Stand"))
+raremax <- min(rowSums(otu_table(phy.aoa.rare)))
+Rarefaction.aoa.ggplot <- ggplot(xy, aes(x=subsample, y=value, group=SampleID)) + geom_line(aes(color=SampleID), size = 0.8) + scale_color_manual(values=boxplot.colors) +geom_vline(xintercept = raremax, color = "red", linetype = "dashed") + theme_bw() +ggtitle("Rarefaction Curves by Stand") + theme(plot.title =element_text(hjust = 0.5)) + xlab("Subsampled Reads") + ylab("Observed ASVs") + theme(plot.title = element_text(size = 20),legend.key.size = unit(.8,"cm"),legend.text = element_text(size = 16), legend.title=element_text(size = 18), axis.text = element_text(size = 10), axis.title = element_text(size = 16)) + guides(color=guide_legend(title = "Stand"))
