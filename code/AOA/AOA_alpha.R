@@ -43,3 +43,4 @@ rownames(xy) <- NULL
 xy$SampleID <- factor(xy$SampleID, levels=c("41", "7", "58", "100", "6", "24","22"))
 
 Rarefaction.aoa.ggplot <- ggplot(xy, aes(x=subsample, y=value, group=SampleID)) + geom_line(aes(color=SampleID), size = 0.8) + scale_color_manual(values=boxplot.colors) + theme_bw() +ggtitle("Rarefaction Curves by Stand") + theme(plot.title =element_text(hjust = 0.5)) + xlab("Subsampled Reads") + ylab("Observed ASVs") + theme(plot.title = element_text(size = 20),legend.key.size = unit(.8,"cm"),legend.text = element_text(size = 16), legend.title=element_text(size = 18), axis.text = element_text(size = 10), axis.title = element_text(size = 16)) + guides(color=guide_legend(title = "Stand"))
+ggsave("Rarefaction_AOA_Stand_Averages.pdf")
