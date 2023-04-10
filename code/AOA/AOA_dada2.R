@@ -121,7 +121,13 @@ seqtab <- makeSequenceTable(dadaRs)
 dim(seqtab)
 saveRDS(seqtab, file = "data/seqtab.rds")
 
-seqtab.nochim <- removeBimeraDenovo(seqtab, method = "pooled", multithread = FALSE, verbose = TRUE)
+#Remove ASVs from the data set that are not in at least 2 plots
+ASVs.multisamp <- integer()
+for (i in 1:365) {if(sum(seqtab[,i]==0) != 37){tmp.paste <- i; ASVs.multisamp <- append(ASVs.multisamp, tmp.paste) }}
+seqtab.multisamp <- seqtab[, ASVs.multisamp]
+dim(seqtab.multisamp)
+      
+seqtab.nochim <- removeBimeraDenovo(seqtab.multisamp, method = "pooled", multithread = FALSE, verbose = TRUE)
 dim(seqtab.nochim)
 sum(seqtab.nochim)/sum(seqtab)
 
@@ -161,7 +167,7 @@ uniquesToFasta(getUniques(seqtab.nochim), "data/seqtab_nochim_uniques.fasta")
 
 library(stringr)
 
-asv1 <- data.frame(t(seqtab.R.nochim))
+asv1 <- data.frame(t(seqtab.nochim))
 asv1$sequence <- rownames(asv1)
 rownames(asv1) <- NULL
 nrow(asv1)
@@ -224,10 +230,10 @@ for (col in 1:ncol(tax2)) {
                               
 #Formatting to get it ready to create phyloseq package for ASV, tax and 
 asv_tax <-asv2
-asv_tax$ASV <- str_split_fixed(asv_tax$header, ";", 2)[,1]
-asv_tax$header <- NULL
-asv_tax <- merge(asv_tax, tax3b, by = "ASV")
-
+colnames(asv_tax)[2] <- "ASV"
+asv_tax <- merge(asv_tax, tax2, by = "header")
+#asv_tax$ASV <- str_split_fixed(asv_tax$header, ";", 2)[,1]
+                           
 phy.tbl <- asv_tax
 row.names(phy.tbl) <- asv_tax$sequence
 phy.tbl$sequence <- NULL
@@ -256,8 +262,9 @@ taxa_names(phy.aoa) <- paste0("ASV_", seq(ntaxa(phy.aoa)))
                               
 #Remove plots 49, 65 and 71 (low number of reads), plot 20 (only plot for that stand) and ASVs with < 2 occurences
 phy.aoa.pruned <- prune_samples(sample_names(phy.aoa) != c("AOA49", "AOA65", "AOA71"), phy.aoa)
-phy.aoa.pruned <- prune_samples(sample_names(phy.aoa) != "AOA20", phy.aoa.pruned)
-phy.aoa.pruned <- prune_taxa(taxa_sums(phy.aoa.pruned) > 2, phy.aoa.pruned)
+phy.aoa.pruned <- prune_samples(sample_names(phy.aoa.pruned) != "AOA20", phy.aoa.pruned)
+phy.aoa.pruned <- prune_taxa(taxa_sums(phy.aoa.pruned) > 2, phy.aoa.pruned) #Remove smaller read counts after removing other plots
+#Flist and filter_taxa by occurence in multiple plots?
 
 #Transforma data with decostand
 library(vegan)
