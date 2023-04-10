@@ -263,8 +263,10 @@ taxa_names(phy.aoa) <- paste0("ASV_", seq(ntaxa(phy.aoa)))
 #Remove plots 49, 65 and 71 (low number of reads), plot 20 (only plot for that stand) and ASVs with < 2 occurences
 phy.aoa.pruned <- prune_samples(sample_names(phy.aoa) != c("AOA49", "AOA65", "AOA71"), phy.aoa)
 phy.aoa.pruned <- prune_samples(sample_names(phy.aoa.pruned) != "AOA20", phy.aoa.pruned)
-phy.aoa.pruned <- prune_taxa(taxa_sums(phy.aoa.pruned) > 2, phy.aoa.pruned) #Remove smaller read counts after removing other plots
-#Flist and filter_taxa by occurence in multiple plots?
+#Removing plots means that some ASVs are not in multiple samples now; I will filter_taxa to remove any that are not in at least 2 plots.
+library(genefilter)
+flist <- filterfun_sample(kOverA(2, 1))
+phy.aoa.pruned <- filter_taxa(phy.aoa.pruned, flist, TRUE)
 
 #Transforma data with decostand
 library(vegan)
