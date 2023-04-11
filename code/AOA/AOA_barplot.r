@@ -25,7 +25,7 @@ TAX.all.aoa.tbl <- ASV.aoa.tbl %>% inner_join(phy.aoa.tax.df, ., by = "ASV")
 
 #Will use these again for TITAN analysis later
 saveRDS(ASV.aoa.tbl, file="ASV_AOA_Table.rds")
-saveRDS(TAX.all.aoa.tbl, file = “TAX_ALL_AOA_Table.rds)
+saveRDS(TAX.all.aoa.tbl, file = "TAX_ALL_AOA_Table.rds")
 
 TAX2.aoa.tbl <-  TAX.all.aoa.tbl %>% group_by(TAX2, STAND, PLOT) %>% summarize(COUNT = sum(COUNT))%>% ungroup()%>% select(TAX2, STAND, PLOT, COUNT)
 
