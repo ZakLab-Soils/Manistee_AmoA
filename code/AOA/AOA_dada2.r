@@ -3,11 +3,9 @@ library(dada2)
 library(ShortRead)
 library(Biostrings)
 
-#setwd for folder where plan to sort and store output for R ("C:/Users/17348/Desktop/amoa-AOA/aoa/2023")
+#setwd for folder where plan to sort and store output for R ("C:/**/**//amoa-AOA")
 
-#set.seed(101279)
-
-#source("functions.R") ##I’m trying to skip this so I need to see when it gets used. I think it’s only for STAND <-> PLOT assignment so I can create a file for that info (metadata file that is the compiled soil data (ph, aq2, etc) with assignments
+set.seed(101279)
 
 path <- "../../reads/" #This folder contains the sequence data - can be same as wd if the reads are in that folder
 list.files(path)
