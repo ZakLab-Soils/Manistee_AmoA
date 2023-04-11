@@ -8,20 +8,21 @@ phy.aoa.pruned <- readRDS("Phyloseq_AOA_Pruned.rds")
 phy.aoa.rare <- rarefy_even_depth(phy.aoa.pruned, rngseed =49657120, sample.size=min(sample_sums(phy.aoa.pruned)), replace=F)
 sample_data(phy.aoa.rare)$STAND.CLEAN <- as.factor(gsub("Stand_*", "", fixed=FALSE, sample_data(phy.aoa.rare)$STAND))
 
-plot.shannon.data <- plot_richness(phy.aoa.rare, x="STAND.CLEAN", measures = "Shannon", color = "STAND.CLEAN")$data
-plot.shannon.data$STAND.CLEAN <- factor(plot.shannon.data$STAND.CLEAN, levels = c("41", "7", "58", "100", "6", "24", "22"))
+plot.shannon.data.aoa <- plot_richness(phy.aoa.rare, x="STAND.CLEAN", measures = "Shannon", color = "STAND.CLEAN")$data
+plot.shannon.data.aoa$STAND.CLEAN <- factor(plot.shannon.data$STAND.CLEAN, levels = c("58", "7", "41", "100", "24", "22", "6"))
 
-plot.chao.data <- plot_richness(phy.aoa.rare, x="STAND.CLEAN", measures = "Chao1", color = "STAND.CLEAN")$data
-plot.chao.data$STAND.CLEAN <- factor(plot.chao.data$STAND.CLEAN, levels = c("41", "7", "58", "100", "6", "24", "22"))
+plot.chao.data.aoa <- plot_richness(phy.aoa.rare, x="STAND.CLEAN", measures = "Chao1", color = "STAND.CLEAN")$data
+plot.chao.data.aoa$STAND.CLEAN <- factor(plot.chao.data$STAND.CLEAN, levels = c("58", "7", "41", "100", "24", "22", "6"))
 
-boxplot.colors <- c("coral4", "coral3", "coral2", "dodgerblue", "dodgerblue2", "dodgerblue3", "dodgerblue4" )
+boxplot.colors.aoa <- c("coral4", "coral3", "pink2", "purple", "dodgerblue2", "dodgerblue4", "darkblue")
 
-shannon.plot <- ggplot(data=plot.shannon.data, aes(x=STAND.CLEAN, y=value, fill = STAND.CLEAN)) + geom_boxplot(alpha=0.7) + xlab(paste0("STAND")) + ylab(paste0(" Diversity")) + guides(fill=guide_legend(title="Stand"))+scale_fill_manual(values = boxplot.colors)+theme(text=element_text(size = 18)) + ggtitle("Shannon Diversity of amoA in AOA")
+shannon.plot.aoa <- ggplot(data=plot.shannon.data.aoa, aes(x=STAND.CLEAN, y=value, fill = STAND.CLEAN)) + geom_boxplot(alpha=0.7) + xlab(paste0("STAND")) + ylab(paste0(" Diversity")) + guides(fill=guide_legend(title="Stand"))+scale_fill_manual(values = boxplot.colors.aoa)+theme(text=element_text(size = 18)) + theme(panel.background = element_blank()) + ggtitle("Shannon Diversity of amoA in AOA")
+ggsave("Shannon_boxplot_AOA.pdf", width = 8.5, height = 10)
 
-chao.plot <- ggplot(data=plot.chao.data, aes(x=STAND.CLEAN, y=value, fill = STAND.CLEAN)) + geom_boxplot(alpha=0.7) + xlab(paste0("STAND")) + ylab(paste0("Chao1 Estimation")) + guides(fill=guide_legend(title="Stand"))+scale_fill_manual(values = boxplot.colors)+theme(text=element_text(size = 18)) + ggtitle("Chao1 of amoA in AOA")
+chao.plot.aoa <- ggplot(data=plot.chao.data.aoa, aes(x=STAND.CLEAN, y=value, fill = STAND.CLEAN)) + geom_boxplot(alpha=0.7) + xlab(paste0("STAND")) + ylab(paste0("Chao1 Estimation")) + guides(fill=guide_legend(title="Stand"))+scale_fill_manual(values = boxplot.colors.aoa)+theme(text=element_text(size = 18)) + theme(panel.background = element_blank()) + ggtitle("Chao1 of amoA in AOA")
+ggsave("Chao_boxplot_AOA.pdf", width = 8.5, height = 10)
 
 ##Rarefaction by Stand
-
 sample_data(phy.aoa.rare)$STAND.CLEAN <- as.factor(gsub("Stand_*", "", fixed=FALSE, sample_data(phy.aoa.rare)$STAND))
 sample_data(phy.aoa.rare)$STAND.CLEAN <- factor(sample_data(phy.aoa.rare)$STAND.CLEAN, c("41", "7", "58", "100", "6", "24", "22")) 
 phy.aoa.rare.merged <- merge_samples(phy.aoa.rare, "STAND.CLEAN")
