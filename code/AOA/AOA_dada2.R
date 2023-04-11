@@ -267,7 +267,4 @@ phy.aoa.pruned <- prune_samples(sample_names(phy.aoa.pruned) != "AOA20", phy.aoa
 library(genefilter)
 flist <- filterfun_sample(kOverA(2, 1))
 phy.aoa.pruned <- filter_taxa(phy.aoa.pruned, flist, TRUE)
-
-#Transforma data with decostand
-library(vegan)
-phy.aoa.hel <- decostand(phyloseq::otu_table(phy.aoa.pruned), method = "hellinger")
+saveRDS(phy.aoa.pruned, file = "Phyloseq_AOA_Pruned.rds")
