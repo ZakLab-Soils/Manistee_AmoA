@@ -3,11 +3,11 @@ library(dada2)
 library(ShortRead)
 library(Biostrings)
 
-#setwd for folder where plan to sort and store output for R ("C:/**/**//amoa-AOA")
+#setwd for folder where plan to sort and store output for R ("C:~/amoa-AOA")
 
 set.seed(101279)
 
-path <- "../../reads/" #This folder contains the sequence data - can be same as wd if the reads are in that folder
+path <- "reads" #This folder contains the sequence data - can be same as wd if the reads are in that folder
 list.files(path)
                     
 fnFs <- sort(list.files(path, pattern = "_R1_001.fastq.gz", full.names = TRUE))
@@ -25,7 +25,7 @@ fnRs.filtN <- file.path(path, "filtN", basename(fnRs))
  
 noN.ft <- filterAndTrim(fnFs, fnFs.filtN, fnRs, fnRs.filtN, maxN=0, multithread = FALSE)
 
-cutadapt <- "/Users/17348/AppData/Local/Programs/Python/Python310/Scripts/cutadapt"
+cutadapt <- "~/Python/Python310/Scripts/cutadapt"
 path.cut <- file.path(path, "cutadapt_processed")
 
 if(!dir.exists(path.cut)) dir.create(path.cut)
