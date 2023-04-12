@@ -150,10 +150,9 @@ samdf <- data.frame(PLOT = aob.plots, stringsAsFactors = FALSE)
 samdf <- merge(samdf, soil.data.all, by = "PLOT")
 row.names(samdf) <- samples.out
 
-#Create phyloseq object
+#Create phyloseq object; Keep read names until after clustering.
 
 library(phyloseq)
-
 phy.aob <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), sample_data(samdf))
                               
 #Removing plots means that some ASVs are not in multiple samples now; I will filter_taxa to remove any that are not in at least 2 plots.
