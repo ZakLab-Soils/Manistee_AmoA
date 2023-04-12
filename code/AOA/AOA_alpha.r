@@ -9,10 +9,10 @@ phy.aoa.rare <- rarefy_even_depth(phy.aoa.pruned, rngseed =49657120, sample.size
 sample_data(phy.aoa.rare)$STAND.CLEAN <- as.factor(gsub("Stand_*", "", fixed=FALSE, sample_data(phy.aoa.rare)$STAND))
 
 plot.shannon.data.aoa <- plot_richness(phy.aoa.rare, x="STAND.CLEAN", measures = "Shannon", color = "STAND.CLEAN")$data
-plot.shannon.data.aoa$STAND.CLEAN <- factor(plot.shannon.data$STAND.CLEAN, levels = c("58", "7", "41", "100", "24", "22", "6"))
+plot.shannon.data.aoa$STAND.CLEAN <- factor(plot.shannon.data.aoa$STAND.CLEAN, levels = c("58", "7", "41", "100", "24", "22", "6"))
 
 plot.chao.data.aoa <- plot_richness(phy.aoa.rare, x="STAND.CLEAN", measures = "Chao1", color = "STAND.CLEAN")$data
-plot.chao.data.aoa$STAND.CLEAN <- factor(plot.chao.data$STAND.CLEAN, levels = c("58", "7", "41", "100", "24", "22", "6"))
+plot.chao.data.aoa$STAND.CLEAN <- factor(plot.chao.data.aoa$STAND.CLEAN, levels = c("58", "7", "41", "100", "24", "22", "6"))
 
 boxplot.colors.aoa <- c("coral4", "coral3", "pink2", "purple", "dodgerblue2", "dodgerblue4", "darkblue")
 
