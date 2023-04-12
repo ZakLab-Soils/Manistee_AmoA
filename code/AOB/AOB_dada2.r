@@ -2,11 +2,9 @@ library(dada2)
 library(ShortRead)
 library(Biostrings)
 
-#setwd for folder where plan to sort and store output for R ("C:/Users/17348/Desktop/amoa-AOA/aoa/2023")
+#setwd for folder where plan to sort and store output for R ("C:/**/**/amoa-AOB/")
 
-#set.seed(101279)
-
-#source("functions.R") ##I’m trying to skip this so I need to see when it gets used. I think it’s only for STAND <-> PLOT assignment so I can create a file for that info (metadata file that is the compiled soil data (ph, aq2, etc) with assignments
+set.seed(101279)
 
 path <- "../../reads/" #This folder contains the sequence data - can be same as wd if the reads are in that folder
 list.files(path)
@@ -26,7 +24,7 @@ fnRs.filtN <- file.path(path, "filtN", basename(fnRs))
  
 noN.ft <- filterAndTrim(fnFs, fnFs.filtN, fnRs, fnRs.filtN, maxN=0, multithread = FALSE)
 
-cutadapt <- "/Users/17348/AppData/Local/Programs/Python/Python310/Scripts/cutadapt"
+cutadapt <- "~/Python/Python310/Scripts/cutadapt"
 path.cut <- file.path(path, "cutadapt_processed")
 
 if(!dir.exists(path.cut)) dir.create(path.cut)
@@ -34,8 +32,8 @@ if(!dir.exists(path.cut)) dir.create(path.cut)
 fnFs.cut <- file.path(path.cut, basename(fnFs))
 fnRs.cut <- file.path(path.cut, basename(fnRs))
 
-FWD <- "ATGGTCTGGCTWAGACG"
-REV <- "GCCATCCATCTGTATGTCCA"
+FWD <- "GGGGTTTCTACTGGTGGT"
+REV <- "CCCCTCKGSAAAGCCTTCTTC"
 REV.RC <- dada2:::rc(REV)
 FWD.RC <- dada2:::rc(FWD)
 
@@ -72,7 +70,7 @@ rbind(FWD.FowardReads = sapply(FWD.orients, primerHits, fn=fnFs.filtN[[1]]), FWD
 #REV.ForwardReads       x          x       x       x
 #REV.ReverseReads       x          x       x       x
 
-rbind(FWD.FowardReads = sapply(FWD.orients, primerHits, fn=fnFs.cut[[1]]), # Quantify error rateFWD.ReverseReads = sapply(FWD.orients, primerHits, fn=fnRs.cut[[1]]), REV.ForwardReads = sapply(REV.orients, primerHits, fn=fnFs.cut[[1]]), REV.ReverseReads = sapply(REV.orients, primerHits, fn=fnRs.cut[[1]]))
+rbind(FWD.FowardReads = sapply(FWD.orients, primerHits, fn=fnFs.cut[[1]]), FWD.ReverseReads = sapply(FWD.orients, primerHits, fn=fnRs.cut[[1]]), REV.ForwardReads = sapply(REV.orients, primerHits, fn=fnFs.cut[[1]]), REV.ReverseReads = sapply(REV.orients, primerHits, fn=fnRs.cut[[1]]))
 #                Forward Complement Reverse RevComp
 #FWD.FowardReads        0          0       0       0
 #FWD.ReverseReads       0          0       0       0
@@ -84,13 +82,17 @@ cutRs <- sort(list.files(path.cut, pattern = "R2_001.fastq.gz", full.names = TRU
 
 ## Filter and trim for length, quality and size; Calculate error rate.
 
-get.sample.name <- function(fname) strsplit(basename(fname), "_")[[1]][1]
+get.sample.name <- function(fname) strsplit(basename(fname), "-|_" )[[1]][3]
 sample.names <- unname(sapply(cutFs, get.sample.name))
 head(sample.names)
 
 filtFs <- file.path(path.cut, "filtered", basename(cutFs))
 filtRs <- file.path(path.cut, "filtered", basename(cutRs))
 
+
+
+
+#Still re-editing
 filter.summary <- filterAndTrim(cutFs, filtFs, cutRs, filtRs, maxN = 0, maxEE = c(2,2), truncQ = 2, minLen = c(200,200), rm.phix = TRUE, compress = TRUE, multithread = FALSE)
 
 #Double check the quality looks acceptable across reads. We felt it was not not necessary to trim the read lengths for this data set.
