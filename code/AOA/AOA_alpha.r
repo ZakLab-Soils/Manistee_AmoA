@@ -24,12 +24,12 @@ ggsave("Chao_boxplot_AOA.pdf", width = 8.5, height = 10)
 
 ##Rarefaction by Stand
 sample_data(phy.aoa.rare)$STAND.CLEAN <- as.factor(gsub("Stand_*", "", fixed=FALSE, sample_data(phy.aoa.rare)$STAND))
-sample_data(phy.aoa.rare)$STAND.CLEAN <- factor(sample_data(phy.aoa.rare)$STAND.CLEAN, c("41", "7", "58", "100", "6", "24", "22")) 
+sample_data(phy.aoa.rare)$STAND.CLEAN <- factor(sample_data(phy.aoa.rare)$STAND.CLEAN, levels = c("41", "7", "58", "100", "6", "24", "22")) 
 phy.aoa.rare.merged <- merge_samples(phy.aoa.rare, "STAND.CLEAN")
 #To average the rarefied data that is merged by the number of plots in each stand
 stand.counts.aoa <- c(5, 5, 5, 5, 6, 6, 6)
 
-rarefaction.aoa <- rarecurve(as(round(otu_table(phy.aoa.rare.merged)/stand.counts.aoa), "matrix"), step = 100, col = boxplot.colors
+rarefaction.aoa <- rarecurve(as(round(otu_table(phy.aoa.rare.merged)/stand.counts.aoa), "matrix"), step = 100, col = boxplot.colors.aoa)
 names(rarefaction.aoa) <- sample_names(phy.aoa.rare.merged)
 
 protox <- mapply(FUN = function(x, y) {
