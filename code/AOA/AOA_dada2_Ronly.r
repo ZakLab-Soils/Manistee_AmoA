@@ -84,16 +84,12 @@ plotQualityProfile(filtRs)
 errR <- learnErrors(filtRs, multithread = FALSE)
 
 #Plot error rates - check if black line (estimated error) matches points (observed error)
-#errF.plot <- plotErrors(errF, nominalQ = TRUE)
 errR.plot <- plotErrors(errR, nominalQ = TRUE)
 
-#derepFs <- derepFastq(filtFs, verbose = TRUE)
 derepRs <- derepFastq(filtRs, verbose = TRUE)
 
-#names(derepFs) <- sample.names
 names(derepRs) <- sample.names
 
-dadaFs <- dada(derepFs, err = errF, multithread = FALSE)
 dadaRs <- dada(derepRs, err = errR, multithread = FALSE)
 
 #Sequences do not overlap for the most part, and we chose the reverse reads to use
@@ -103,7 +99,7 @@ saveRDS(seqtab, file = "data/seqtab.rds")
 
 #Remove ASVs from the data set that are not in at least 2 plots
 ASVs.multisamp <- integer()
-for (i in 1:365) {if(sum(seqtab[,i]==0) != 37){tmp.paste <- i; ASVs.multisamp <- append(ASVs.multisamp, tmp.paste) }}
+for (i in 1:dim(seqtab)[2]) {if(sum(seqtab[,i]==0) != 37){tmp.paste <- i; ASVs.multisamp <- append(ASVs.multisamp, tmp.paste) }}
 seqtab.multisamp <- seqtab[, ASVs.multisamp]
 dim(seqtab.multisamp)
       
@@ -158,7 +154,7 @@ fastaToDf <- function(fastaFile){
     fasta_df <- data.frame(header = names(dnaSeq), sequence = paste(dnaSeq))
 }
 
-fasta.uchime <- fastaToDf("seqtab_nochim_uniques_match_uchimed.fasta")
+fasta.uchime <- fastaToDf("uniques_nochim_uniques_match_uchimed.fasta")
 asv2 <- merge(fasta.uchime, asv1)
 
 #   sequence                header        AOA10 AOA11 AOA12
