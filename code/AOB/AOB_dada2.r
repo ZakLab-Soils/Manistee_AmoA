@@ -4,7 +4,7 @@ library(Biostrings)
 
 #setwd for folder where plan to sort and store output for R ("C:/**/**/amoa-AOB/")
 
-set.seed(101279)
+set.seed(496571)
 
 path <- "../../reads/" #This folder contains the sequence data - can be same as wd if the reads are in that folder
 list.files(path)
