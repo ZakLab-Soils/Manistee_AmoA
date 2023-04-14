@@ -1,5 +1,6 @@
 library(vegan)
 library(tidyverse)
+set.seed(496571)
 
 phy.aoa.pruned <- readRDS("Phyloseq_AOA_Pruned.rds")
 
@@ -20,7 +21,10 @@ mantel.nmin.aoa <- mantel(phy.aoa.bc, dist.nmin.aoa, method = "spearman", permut
 mantel.ammpost.aoa <- mantel(phy.aoa.bc, dist.ammpost.aoa, method = "spearman", permutations = 9999, na.rm = TRUE)
 
 #adonis (permanvoa) works on discrete variables, so STAND or create groupings based on environmental variables (A vs B or A,B,C) to test.
-adonis2(phy.aoa.bc ~STAND , data =sample.data.aoa)
+adonis.aoa <- adonis2(phy.aoa.bc ~STAND , data =sample.data.aoa)
+
+myresults.mantel.adonis.aoa <- list(mantel.soilph.aoa, mantel.nmin.aoa, mantel.ammpost.aoa, adonis.aoa)
+capture.output(myresults.mantel.adonis.aoa, file = "Mantel_Adonis_AOA_Results.txt")
 
 #Create NMDS Plot
 nmds.data.aoa <- as.data.frame(scores(phy.aoa.nmds))
