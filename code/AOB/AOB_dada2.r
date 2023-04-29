@@ -142,9 +142,52 @@ colnames(track) <- c("input", "filtered", "denoisedF", "denoisedR", "merged", "n
 rownames(track) <- sample.names
 head(track) 
 
+#uniquesToFasta(getUniques(seqtab.nochim), ids=paste0("ASV_", seq(length(getUniques(seqtab.nochim)))), "seqtab_nochim_uniques_renamed.fasta")
+#Used Aigle paper database classification (D1-D17) - Note that these are already trimmed to 414 since some of reads do not exist longer than that.
+## Taxonomy classification in Qiime2 - showing commands here that were used
+
+#conda activate qiime2-2022.2
+
+#qiime tools import --input-path Desktop/amoa_qiime/seqtab_nochim_uniques.fasta --type 'FeatureData[Sequence]' --output-path Desktop/amoa_qiime/seqtab_nochim_uniques.qza
+
+#Removed all dash marks (-) from AamoA.db_nr.aln.fasta file
+#qiime tools import --type 'FeatureData[Sequence]' --input-path Desktop/amoa_qiime/AigleDB_ref_reads.fasta --output-path Desktop/amoa_qiime/AigleDB_ref_reads.qza
+#qiime tools import --type 'FeatureData[Taxonomy]' --input-format HeaderlessTSVTaxonomyFormat --input-path Desktop/amoa_qiime/AigleDB_taxonomy_qiime.txt --output-path Desktop/amoa_qiime/AigleDB_taxonomy_qiime.qza
+#qiime feature-classifier classify-consensus-vsearch --i-query seqtab_nochim_uniques.qza --i-reference-reads AigleDB_ref_reads.qza --i-reference-taxonomy AigleDB_taxonomy_qiime.qza --p-perc-identity 0.8 --p-query-cov 0.6 --p-top-hits-only --p-strand both --p-maxaccepts 1 --p-unassignable-label 'Unassigned' --o-classification taxonomy_convsea.qza
+ 
+##Combine qiime taxonomy, ASV table to create phyloseq object
+
+#asv.aob <- data.frame(t(seqtab.nochim))
+#asv.aob$sequence <- rownames(asv.aob)
+#rownames(asv.aob) <- NULL
+#asv.aob$ASV <- paste0("ASV_", seq(length(getUniques(seqtab.nochim))))
+
+#Taxonomy file import and clean up
+#tax <- read.table("AOB_AigleDB_taxonomy.tsv", header = TRUE, sep = "\t")
+#tax$Consensus <- NULL
+#tax <- cbind(tax, str_split_fixed(tax$Taxon, ";", 3))
+#tax$Taxon <- NULL
+#tax <- as.data.frame(apply(tax, 2, function(x) gsub("^$|^$", NA, x)))
+                              
+#names(tax)[1] <- "ASV"
+#names(tax)[-1] <- c("Lineage", "Genus", "Strain")
+                              
+#Formatting to get it ready to create phyloseq package for ASV, tax and 
+#asv.aob.tax <-asv.aob
+#asv.aob.tax <- merge(asv.aob.tax, tax, by = "ASV")
+#row.names(asv.aob.tax) <- asv.aob.tax$ASV
+#asv.aob.tax$sequence <- NULL
+#asv.aob.tax$ASV <- NULL
+
+#asv.tbl <- t(asv.aob.tax[,1:39])
+#tax.tbl <- asv.aob.tax[,40:length(asv.aob.tax)]
+
+
+
 #Import soil environmental variables and metadata for samdf
 soil.data.all <- read.csv("All_soil_compiled_data.csv")
 samples.out <- rownames(seqtab.nochim)
+#samples.out <- rownames(asv.tbl)
 aob.plots <- paste0("Plot_", gsub("AOB", "", samples.out))
 samdf <- data.frame(PLOT = aob.plots, stringsAsFactors = FALSE)
 samdf <- merge(samdf, soil.data.all, by = "PLOT")
@@ -154,7 +197,8 @@ row.names(samdf) <- samples.out
 
 library(phyloseq)
 phy.aob <- phyloseq(otu_table(seqtab.nochim, taxa_are_rows=FALSE), sample_data(samdf))
-                              
+#phy.aob <- phyloseq(otu_table(asv.tbl, taxa_are_rows=FALSE), tax_table(as.matrix(tax.tbl)), sample_data(samdf))                               
+
 #Removing plots means that some ASVs are not in multiple samples now; I will filter_taxa to remove any that are not in at least 2 plots.
 library(genefilter)
 flist <- filterfun_sample(kOverA(2, 1))
