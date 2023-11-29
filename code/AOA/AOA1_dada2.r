@@ -45,8 +45,6 @@ for(i in seq_along(fnFs)){system2(cutadapt, args = c(R1.flags, R2.flags, "-n", 2
 
 #Cutadapt Command line parameters: -g ATGGTCTGGCTWAGACG -a TGGACATACAGATGGATGGC -G GCCATCCATCTGTATGTCCA -A CGTCTWAGCCAGACCAT -n 2 -o data/cutadapt_processed/AOA7_S1_L001_R1_001.fastq.gz #-p data/cutadapt_processed/AOA7_S1_L001_R2_001.fastq.gz data/filtN/AOA7_S1_L001_R1_001.fastq.gz data/filtN/AOA7_S1_L001_R2_001.fastq.gz
 
-#See how much the primers appear in the data for selected libraries. To check all libraries change[N] to different library numbers.
-
 allOrients <- function(primer) {
 require(Biostrings)
 dna <- DNAString(primer)
@@ -96,7 +94,7 @@ filter.summary <- filterAndTrim(cutFs, filtFs, cutRs, filtRs, maxN = 0, maxEE = 
 plotQualityProfile(filtFs)
 plotQualityProfile(filtRs)
 
-##Error rate processing, dereplication and ASV inference and sequence table formation
+##Error rate processing, dereplication and ASV inference and sequence table formation. You can save error rate as an RDS.
 
 errF <- learnErrors(filtFs, multithread = FALSE)
 errR <- learnErrors(filtRs, multithread = FALSE)
@@ -119,18 +117,11 @@ seqtab <- makeSequenceTable(dadaRs)
 dim(seqtab)
 saveRDS(seqtab, file = "data/seqtab.rds")
 
-#Remove ASVs from the data set that are not in at least 2 plots
-ASVs.multisamp <- integer()
-for (i in 1:365) {if(sum(seqtab[,i]==0) != 37){tmp.paste <- i; ASVs.multisamp <- append(ASVs.multisamp, tmp.paste) }}
-seqtab.multisamp <- seqtab[, ASVs.multisamp]
-dim(seqtab.multisamp)
-      
-seqtab.nochim <- removeBimeraDenovo(seqtab.multisamp, method = "pooled", multithread = FALSE, verbose = TRUE)
+seqtab.nochim <- removeBimeraDenovo(seqtab, method = "pooled", multithread = FALSE, verbose = TRUE)
 dim(seqtab.nochim)
 sum(seqtab.nochim)/sum(seqtab)
 
 ##Track DADA2 pipeline
-
 getN <- function(x) sum(getUniques(x))
 track <- as.data.frame(cbind(filter.summary, sapply(dadaRs, getN), rowSums(seqtab.nochim)))
 colnames(track) <- c("input", "filtered", "denoisedR", 
@@ -141,10 +132,7 @@ head(track)
 
 uniquesToFasta(getUniques(seqtab.nochim), "data/seqtab_nochim_uniques.fasta")
 
-#Reference https://github.com/alex-bagnoud/arctic-nitrifiers#2-dada2-pipeline-in-r
-#Put databases in the github folder and a read.me in there that states where the files come from (the Nature paper)
-
-#Files for removing non-AmoA and guided chimera removal are found in the database folder. References for them are in the read.me file in that folder.
+#Files for removing non-AmoA and guided chimera removal are found in the database folder. Files come from Alves et al 2018 (https://doi.org/10.1038/s41467-018-03861-1).
 
 #command line for usearch to double check/remove non-amoA sequences for AOA
 #usearch11.0.667.exe -usearch_global seqtab_nochim_uniques.fasta -db ..\databases\AamoA.db_nr.aln.fasta -id 0.55 -strand both -uc uclust_uniques.txt -matched uniques_match.fasta -notmatched uniques_notmatch.fasta
@@ -153,16 +141,15 @@ uniquesToFasta(getUniques(seqtab.nochim), "data/seqtab_nochim_uniques.fasta")
 ## Taxonomy classification in Qiime2 - showing commands here that were used
 
 #conda activate qiime2-2022.2
-
-#qiime tools import --input-path Desktop/amoa_qiime/uniques_nochim_pooled_match_uchimed.fna --type 'FeatureData[Sequence]' --output-path Desktop/amoa_qiime/uniques_nochim_pooled_match_uchimed.qza
+#qiime tools import --input-path ../uniques_nochim_pooled_match_uchimed.fna --type 'FeatureData[Sequence]' --output-path ../uniques_nochim_pooled_match_uchimed.qza
 
 #Removed all dash marks (-) from AamoA.db_nr.aln.fasta file
-#qiime tools import --type 'FeatureData[Sequence]' --input-path Desktop/amoa_qiime/AamoA.db_nr.aln.fna --output-path Desktop/amoa_qiime/AamoA.db_nr.aln.qza
-#qiime tools import --type 'FeatureData[Taxonomy]' --input-format HeaderlessTSVTaxonomyFormat --input-path Desktop/amoa_qiime/AamoA.db_nr.aln_taxonomy_qiime.txt --output-path Desktop/amoa_qiime/AamooA.db_nr.aln_taxonomy_qiime.qza
+#qiime tools import --type 'FeatureData[Sequence]' --input-path ../AamoA.db_nr.aln.fna --output-path ../AamoA.db_nr.aln.qza
+#qiime tools import --type 'FeatureData[Taxonomy]' --input-format HeaderlessTSVTaxonomyFormat --input-path ../AamoA.db_nr.aln_taxonomy_qiime.txt --output-path ../AamooA.db_nr.aln_taxonomy_qiime.qza
 #qiime feature-classifier classify-consensus-vsearch --i-query uniques_nochim_pooled_match_uchimed.qza --i-reference-reads AamoA.db_nr.aln.qza --i-reference-taxonomy AamooA.db_nr.aln_taxonomy_qiime.qza --p-perc-identity 0.8 --p-query-cov 0.5 --p-top-hits-only --p-strand both --p-maxaccepts 1 --p-unassignable-label 'Unassigned' --o-classification taxonomy_convsea.qza
- 
-##Combine qiime taxonomy, ASV table to create phyloseq object
+#Rename and reformat taxonomy.tsv to  qiime_tax_convse.tsv.
 
+##Combine qiime taxonomy, ASV table to create phyloseq object.
 library(stringr)
 
 asv1 <- data.frame(t(seqtab.nochim))
@@ -170,7 +157,7 @@ asv1$sequence <- rownames(asv1)
 rownames(asv1) <- NULL
 nrow(asv1)
 
-#Several steps and functions from Alex # pipeline
+#Format fasta file
 fastaToDf <- function(fastaFile){
     dnaSeq <- readBStringSet(fastaFile)
     fasta_df <- data.frame(header = names(dnaSeq), sequence = paste(dnaSeq))
@@ -250,7 +237,6 @@ samdf <- merge(samdf, soil.data.all, by = "PLOT")
 row.names(samdf) <- samples.out
 
 #Create phyloseq object
-
 library(phyloseq)
 
 phy.aoa <- phyloseq(otu_table(asv.tbl, taxa_are_rows=FALSE), tax_table(as.matrix(tax.tbl)), sample_data(samdf))
