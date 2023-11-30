@@ -2,40 +2,10 @@
 library(tidyverse)
 library(ggplot2)
 
-#phy.aob.asv.df <- data.frame(otu_table(phy.aob.pruned)) %>% as_tibble(., rownames="SAMPLE.ID")
-#phy.aob.samdata.df <- data.frame(sample_data(phy.aob.pruned)) %>%  as_tibble(., rownames = "SAMPLE.ID")
-#phy.aob.tax.df <- data.frame(tax_table(phy.aob.pruned)) %>% as_tibble(., rownames = "ASV") %>% rename_all(toupper) %>% pivot_longer(-ASV, names_to = "RANKING", values_to = "TAXON") %>% pivot_wider(id_cols = ASV, names_from = "RANKING", values_from = TAXON)
-
-#ASV.aob.tbl <- phy.aob.asv.df %>% 
-#pivot_longer(-SAMPLE.ID, names_to = "ASV", values_to = "COUNT") %>%
-#inner_join(phy.aob.samdata.df, ., by = "SAMPLE.ID") %>% 
-#group_by(PLOT, STAND, ASV) %>%
-#summarise(COUNT = sum(COUNT)) %>%
-#ungroup() %>%
-#group_by(ASV) %>%
-#mutate(ASV.TOTAL = sum(COUNT)) %>%
-#ungroup() %>%
-#filter(ASV.TOTAL > 0) %>%
-#select(-ASV.TOTAL)
-
-#TAX.all.aob.tbl <- ASV.aob.tbl %>% inner_join(phy.aob.tax.df, ., by = "ASV")
-#Will use these again for TITAN analysis later
-#saveRDS(ASV.aob.tbl, file="ASV_AOB_Table.rds")
-#saveRDS(TAX.all.aob.tbl, file = "TAX_ALL_AOb_Table.rds")
-
-
-phy.aob.pruned <- readRDS("Phyloseq_AOB_Pruned.rds")
-
+#phy.aob.pruned <- readRDS("Phyloseq_AOB_Pruned.rds")
 Cl.all.aob.tbl <- readRDS("CL_ALL_AOB_Table.rds")
 
 CL1.aob.tbl <-  Cl.all.aob.tbl %>% group_by(CL1, STAND, PLOT) %>% summarize(COUNT = sum(COUNT))%>% ungroup()%>% select(CL1, STAND, PLOT, COUNT)
-
-#TAX2.aob.tbl <-  TAX.all.aob.tbl %>% group_by(LINEAGE, STAND, PLOT) %>% summarize(COUNT = sum(COUNT))%>% ungroup()%>% select(LINEAGE, STAND, PLOT, COUNT)
-
-#TAX2.aob.tmp.tbl <- TAX2.aob.tbl  %>% group_by(LINEAGE) %>% mutate(LINEAGE.TOTAL = sum(COUNT))%>% ungroup() %>% filter(LINEAGE.TOTAL > 0) %>% group_by(PLOT) %>% mutate(PLOT.COUNT = sum(COUNT))%>% ungroup() %>% group_by(LINEAGE, PLOT) %>% mutate(PROP = sum(COUNT)/PLOT.COUNT) %>% ungroup() %>% mutate(HELLINGER = sqrt(PROP))
-
-
-
 CL1.aob.tmp.tbl <- CL1.aob.tbl  %>% group_by(CL1) %>% mutate(CL1.TOTAL = sum(COUNT))%>% ungroup() %>% filter(CL1.TOTAL > 0) %>% group_by(PLOT) %>% mutate(PLOT.COUNT = sum(COUNT))%>% ungroup() %>% group_by(CL1, PLOT) %>% mutate(PROP = sum(COUNT)/PLOT.COUNT) %>% ungroup() %>% mutate(HELLINGER = sqrt(PROP))
 
 #At the 0.1 pairwise clustering, all AOB ASVs collapse into 6 clusters
@@ -44,27 +14,21 @@ CL1.stand.aob.mean$STAND <- gsub("Stand_*", "", fixed=FALSE, CL1.stand.aob.mean$
 CL1.stand.aob.mean <- CL1.stand.aob.mean[order(CL1.stand.aob.mean$STAND), ]
 CL1.stand.aob.mean$STAND <- factor(CL1.stand.aob.mean$STAND, levels = c("58", "9", "7", "41", "100", "6", "24", "22"))
 
-##Remove D10 since it's only one read
-#TAX2.stand.aob.mean <- aggregate(PROP~LINEAGE+STAND, TAX2.aob.tmp.tbl[TAX2.aob.tmp.tbl$LINEAGE != "D10",], mean)
-#TAX2.stand.aob.mean$STAND <- gsub("Stand_*", "", fixed=FALSE, TAX2.stand.aob.mean$STAND)
-#TAX2.stand.aob.mean$STAND <- factor(TAX2.stand.aob.mean$STAND, levels = c("58","9", "7", "41", "100", "6", "24", "22"))
-
-#TAX2.aob.colors <- c("navy", "mediumorchid2" , "mediumpurple", "purple", "purple4")
-#TAX2.stand.aob.mean.plot <- ggplot(TAX2.stand.aob.mean, aes(fill=factor(LINEAGE), y=PROP, x=STAND)) + geom_bar(position = "fill", stat = "identity") + ylab(paste0("Relative Abundance")) + xlab(paste0("Stand")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border = element_blank(), panel.background = element_blank()) +scale_fill_manual(values = TAX2.aob.colors) + guides(fill=guide_legend(title="Lineage"))
-
 CL1.aob.colors <- c("purple", "mediumorchid2" , "mediumpurple", "purple4", "navy", "lavender")
 CL1.stand.aob.mean.plot <- ggplot(CL1.stand.aob.mean, aes(fill=factor(CL1), y=PROP, x=STAND)) + geom_bar(position = "fill", stat = "identity") + ylab(paste0("Relative Abundance")) + xlab(paste0("Stand")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.border = element_blank(), panel.background = element_blank()) +scale_fill_manual(values = CL1.aob.colors) + guides(fill=guide_legend(title="Cluster\n0.1"))
 
 ggsave("Barplot_Cluster_P1_AOB.pdf", width = 8.5, height = 10)
 
-#Sideways barplot with TAX2 Clades separated out
+#Sideways barplot with Lineages separated out
 boxplot.colors.aob  <- c("coral4", "coral3", "pink2", "pink", "purple", "dodgerblue2", "dodgerblue4", "darkblue")
 CL1.stand.aob.mean.group.plot <- ggplot(CL1.stand.aob.mean, aes(fill=STAND, y=factor(CL1), x=PROP)) + geom_bar(position = position_dodge(), stat = "identity") + xlab(paste0("Relative Abundance")) + ylab(paste0("Cluster")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +scale_fill_manual(values = boxplot.colors.aob) + ggtitle("Relative Cluster Abundance in each Stand") + theme(plot.title = element_text(size = 20, hjust=0.5), axis.text=element_text(size = 18), axis.title = element_text(size =16), legend.text=element_text(size=14), legend.position = c(0.8,0.5))
 
-#boxplot.colors.aob  <- c("coral4", "coral3", "pink2", "pink", "purple", "dodgerblue2", "dodgerblue4", "darkblue")
-#TAX2.stand.aob.mean.group.plot <- ggplot(TAX2.stand.aob.mean, aes(fill=STAND, y=factor(LINEAGE), x=PROP)) + geom_bar(position = position_dodge(), stat = "identity") + xlab(paste0("Relative Abundance")) + ylab(paste0("LINEAGE")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +scale_fill_manual(values = boxplot.colors.aob) + ggtitle("Relative Abundance for amoA Lineage in each Stand") + theme(plot.title = element_text(size = 20, hjust=0.5), axis.text=element_text(size = 18), axis.title = element_text(size =16), legend.text=element_text(size=14), legend.position = c(0.8,0.5))
-
 ggsave("Barplot_Cluster_Groups_P1_AOB.pdf", width = 8.5, height = 10)
+
+
+
+###STILL EDITING - NEED TO DECIDE WHICH LEVEL TO USE
+
 
 #Examining Cluster 0.05
 CL05.aob.tbl <-  Cl.all.aob.tbl %>% group_by(CL05, STAND, PLOT) %>% summarize(COUNT = sum(COUNT))%>% ungroup()%>% select(CL05, STAND, PLOT, COUNT)
@@ -102,7 +66,6 @@ CL03.stand.aob.mean.plot <- ggplot(CL03.stand.aob.mean, aes(fill=factor(CL03), y
 
 
 
-###STILL EDITING - NEED TO DECIDE WHICH LEVEL TO USE
 
 #Test for significance for each Clade with Kruskal test and Pairwise-Wilcox
 TAX2.plot.stand.aoa.mean <- aggregate(PROP~TAX2+PLOT+STAND, TAX2.aoa.tmp.tbl, mean)
