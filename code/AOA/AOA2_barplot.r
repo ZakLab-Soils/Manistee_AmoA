@@ -56,27 +56,3 @@ boxplot.colors.aoa <- c("coral4", "coral3", "pink2", "purple", "dodgerblue2", "d
 TAX2.stand.aoa.mean.group.plot <- ggplot(TAX2.stand.aoa.mean.lessNSotu1, aes(fill=STAND, y=TAX2, x=PROP)) + geom_bar(position = position_dodge(), stat = "identity") + xlab(paste0("Relative Abundance")) + ylab(paste0("Clade")) + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank()) +scale_fill_manual(values = boxplot.colors.aoa) + ggtitle("Relative Clade Abundance in each Stand") + theme(plot.title = element_text(size = 20, hjust=0.5), axis.text=element_text(size = 18), axis.title = element_text(size =16), legend.text=element_text(size=14), legend.position = c(0.8,0.3))
 
 ggsave("Barplot_TAXON2_Clades_AOA.pdf", width = 8.5, height = 11)
-
-#Test for significance for each Clade with Kruskal test and Pairwise-Wilcox
-TAX2.plot.stand.aoa.mean <- aggregate(PROP~TAX2+PLOT+STAND, TAX2.aoa.tmp.tbl, mean)
-
-tax2.nsbeta.aoa <- TAX2.plot.stand.aoa.mean[TAX2.plot.stand.aoa.mean$TAX2 == "NS-Beta",]
-tax2.nsdelta.aoa <- TAX2.plot.stand.aoa.mean[TAX2.plot.stand.aoa.mean$TAX2 == "NS-Delta",]
-tax2.nsalpha.aoa <- TAX2.plot.stand.aoa.mean[TAX2.plot.stand.aoa.mean$TAX2 == "NS-Alpha",]
-tax2.nsgamma.aoa <- TAX2.plot.stand.aoa.mean[TAX2.plot.stand.aoa.mean$TAX2 == "NS-Gamma",]
-tax2.ntalpha.aoa <- TAX2.plot.stand.aoa.mean[TAX2.plot.stand.aoa.mean$TAX2 == "NT-Alpha",]
-
-ktnsa.aoa <- kruskal.test(PROP~STAND, data = tax2.nsalpha.aoa)
-ktnta.aoa <- kruskal.test(PROP~STAND, data = tax2.ntalpha.aoa)
-ktnsg.aoa <- kruskal.test(PROP~STAND, data = tax2.nsgamma.aoa)
-ktnsd.aoa <- kruskal.test(PROP~STAND, data = tax2.nsdelta.aoa)
-ktnsb.aoa <- kruskal.test(PROP~STAND, data = tax2.nsbeta.aoa)
-
-ptnsa.aoa <- pairwise.wilcox.test(tax2.nsalpha.aoa$PROP, g=tax2.nsalpha.aoa$STAND, p.adjust.method = "BH")
-ptnsg.aoa  <- pairwise.wilcox.test(tax2.nsgamma.aoa$PROP, g=tax2.nsgamma.aoa$STAND, p.adjust.method = "BH")
-ptnsd.aoa  <- pairwise.wilcox.test(tax2.nsdelta.aoa$PROP, g=tax2.nsdelta.aoa$STAND, p.adjust.method = "BH")
-ptnsb.aoa  <- pairwise.wilcox.test(tax2.nsbeta.aoa$PROP, g=tax2.nsbeta.aoa$STAND, p.adjust.method = "BH")
-ptnta.aoa  <- pairwise.wilcox.test(tax2.ntalpha.aoa$PROP, g=tax2.ntalpha.aoa$STAND, p.adjust.method = "BH")
-
-myresults <- list(ktnsa.aoa, ktnsb.aoa, ktnsd.aoa, ktnsg.aoa, ktnta.aoa, ptnsa.aoa, ptnsb.aoa, ptnsd.aoa, ptnsg.aoa, ptnta.aoa)
-capture.output(myresults, file = "Kruskal_Wilcox_Results.txt")
