@@ -1,5 +1,5 @@
 # *Ammonium availability and pH control the contributions of ammonia-oxidizing bacteria and archaea to nitrification*
-## Jennifer Wen1, Rima Upchurch1, Donald R. Zak1,2
+## Jennifer Wen<sup>1</sup>, Rima Upchurch<sup>1</sup>, Donald R. Zak<sup>1,2</sup>
 1 School for Environment and Sustainability, University of Michigan, Ann Arbor, MI, USA 
 2 Department of Ecology & Evolutionary Biology, University of Michigan, Ann Arbor, MI, USA 
 
