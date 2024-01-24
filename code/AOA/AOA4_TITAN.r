@@ -3,6 +3,7 @@
 library(TITAN2)
 library(tidyverse)
 library(viridisLite)
+library(vegan)
 
 phy.aoa.pruned <- readRDS("Phyloseq_AOA_Pruned.rds")
 ASV.aoa.tbl <- readRDS("ASV_AOA_Table.rds")
